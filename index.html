@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Field Service Center &mdash; A+ service calls</title>
+<script>
+  /* Before first paint, so a saved dark choice does not flash light. */
+  (function(){try{var t=localStorage.getItem("fsc-theme");
+    if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b111b'/%3E%3Cpath d='M20 62 L38 62 L46 40 L56 74 L64 55 L80 55' fill='none' stroke='%232fe0db' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="pg">
+  <div class="wrap">
+    <h1>Field <span>Service Center</span></h1>
+    <p>Five generated service calls at a time, for CompTIA A+ Core 1 (220-1201). Choose the objective first and then the sub-objective inside it &mdash; the picker lists all twenty-seven, including the ones nothing has been built for yet. Work each ticket through all six steps of the troubleshooting methodology, and start by working out which parts of what the caller told you actually hold up.</p>
+    <div class="pg-bar">
+      <label for="domainSelect" style="font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;text-transform:uppercase;color:#b9c6c9">Objective</label>
+      <select id="domainSelect" aria-label="Choose the objective domain"></select>
+      <label for="trackSelect" style="font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;text-transform:uppercase;color:#b9c6c9">Sub-objective</label>
+      <select id="trackSelect" aria-label="Choose the sub-objective and its exercise"></select>
+      <label for="slotSelect" style="font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;text-transform:uppercase;color:#b9c6c9">Ticket</label>
+      <select id="slotSelect" aria-label="Choose ticket"></select>
+      <button class="btn btn--ghost" id="shuffleBtn" type="button" title="Regenerate all five tickets on this track">&#8635; Shuffle</button>
+      <button class="btn btn--ghost" id="instructorBtn" type="button">Instructor mode</button>
+      <button class="btn btn--ghost" id="themeBtn" type="button" aria-pressed="false">Dark</button>
+    </div>
+    <p class="lede" id="brief"></p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="scorebar" id="scorebar"></div>
+    <div class="steps" id="steps"></div>
+  </div>
+</main>
+
+<footer class="pg">
+  <div class="wrap">
+    Every ticket is generated when the page loads &mdash; there is no answer bank to memorise, and Shuffle rebuilds all five.
+    Answers are computed from the instruments actually rendered, so they stay true after a regenerate.<br>
+    Companies, callers, asset tags and part numbers are synthetic. For educational purposes only. Not affiliated with, endorsed by, or sponsored by CompTIA&reg;.
+  </div>
+</footer>
+
+<div class="ov hidden" id="pinOverlay">
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+    <h3 id="pinTitle">Instructor mode</h3>
+    <p>Opens every step, reveals every answer, highlights the significant rows in each table, marks the parts that fit, and shows what the fault actually was. Same PIN as the rest of the toolkit.</p>
+    <input id="pinInput" type="password" inputmode="numeric" autocomplete="off" aria-label="Instructor PIN" placeholder="PIN">
+    <p class="err" id="pinErr" style="display:none"></p>
+    <div class="row">
+      <button class="btn" id="pinOk" type="button">Unlock</button>
+      <button class="btn btn--ghost" id="pinCancel" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Field Service Center &mdash; Identify it</title>
+<script>
+  (function(){try{var t=localStorage.getItem("fsc-theme");
+    if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/drill.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b111b'/%3E%3Cpath d='M20 62 L38 62 L46 40 L56 74 L64 55 L80 55' fill='none' stroke='%232fe0db' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="pg">
+  <div class="wrap">
+    <h1>Identify <span>it</span></h1>
+    <p>Five items at a time, for the CompTIA A+ Core 1 objectives that ask you to compare and contrast rather than to troubleshoot. Nothing on this page tells you the answer &mdash; read the model or the instrument in front of you, and answer from what is actually there.</p>
+    <div class="pg-bar">
+      <label for="domainSelect" style="font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;text-transform:uppercase;color:#b9c6c9">Objective</label>
+      <select id="domainSelect" aria-label="Choose the objective domain"></select>
+      <label for="subjectSelect" style="font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;text-transform:uppercase;color:#b9c6c9">Sub-objective</label>
+      <select id="subjectSelect" aria-label="Choose the sub-objective and its exercise"></select>
+      <label for="slotSelect" style="font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;text-transform:uppercase;color:#b9c6c9">Item</label>
+      <select id="slotSelect" aria-label="Choose item"></select>
+      <button class="btn btn--ghost" id="shuffleBtn" type="button" title="Deal five different connectors">&#8635; Shuffle</button>
+      <button class="btn btn--ghost" id="instructorBtn" type="button" aria-pressed="false">Instructor mode</button>
+      <button class="btn btn--ghost" id="themeBtn" type="button" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="scorebar" id="score"></div>
+    <div class="steps" id="app"></div>
+  </div>
+</main>
+
+<div class="ov hidden" id="pinOverlay">
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+    <h3 id="pinTitle">Instructor mode</h3>
+    <p>Reveals the answer under every question on this drill. Same PIN as the rest of the toolkit.</p>
+    <input id="pinInput" type="password" inputmode="numeric" autocomplete="off" aria-label="Instructor PIN" placeholder="PIN">
+    <div class="row">
+      <button class="btn" id="pinOk" type="button">Unlock</button>
+      <button class="btn btn--ghost" id="pinCancel" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<footer class="pg">
+  <div class="wrap">
+    Every item is generated when the page loads &mdash; there is no answer bank to memorise, and Shuffle deals five different ones.
+    The number of contacts on the model is the number the drill grades, so counting them is a real way to answer.<br>
+    Companies, callers, asset tags and part numbers are synthetic. For educational purposes only. Not affiliated with, endorsed by, or sponsored by CompTIA&reg;.
+  </div>
+</footer>
+
+<script type="module">
+  import { wire } from "./assets/drillui.js";
+  wire();
+</script>
+</body>
+</html>
