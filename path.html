@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>The route through &mdash; Field Service Center</title>
+<script>
+  /* Before first paint, so a saved dark choice does not flash light. */
+  (function(){try{var t=localStorage.getItem("fsc-theme");
+    if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/path.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b111b'/%3E%3Cpath d='M20 62 L38 62 L46 40 L56 74 L64 55 L80 55' fill='none' stroke='%232fe0db' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="pg">
+  <div class="wrap">
+    <h1>The route <span>through</span></h1>
+    <p>Every objective on CompTIA A+ Core 1, 1.1 to 5.6, in the order they are numbered. Work
+      down it, or jump to whatever you need &mdash; nothing here is locked, and the order is a
+      recommendation rather than a gate.</p>
+    <div class="toolbar">
+      <button class="btn" id="continueBtn" type="button">Continue where I left off</button>
+      <a class="btn btn--ghost" href="index.html">Tickets</a>
+      <a class="btn btn--ghost" href="drill.html">Drills</a>
+      <button class="btn btn--ghost" id="themeBtn" type="button" aria-pressed="false">Dark</button>
+    </div>
+    <p class="pathnote" id="overall"></p>
+  </div>
+</header>
+
+<main class="wrap" id="route"></main>
+
+<footer class="pg">
+  <div class="wrap">
+    Progress is remembered in this browser and nowhere else &mdash; no account, nothing sent
+    anywhere. Clearing it is on each exercise's own page.<br>
+    For educational purposes only. Not affiliated with, endorsed by, or sponsored by CompTIA&reg;.
+  </div>
+</footer>
+
+<script type="module" src="assets/path.js"></script>
+</body>
+</html>
