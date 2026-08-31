@@ -1,0 +1,86 @@
+/* The route through. Rides on style.css for tokens, type and the page
+   chrome; everything here is the map itself.
+
+   State is carried by a word first ("Finished", "In progress", "Not
+   started"), then by a left rule whose weight and style differ, and only
+   then by anything you could call colour. A student who cannot separate two
+   hues on a panel still reads every row correctly, which is the whole
+   requirement on this build. */
+
+.pathnote { margin: .9rem 0 0; font-size: var(--fs-sm); line-height: 1.6; }
+
+.domain { margin: 2rem 0 0; }
+.domain__h {
+  margin: 0 0 .8rem;
+  font-size: 1.05rem;
+  letter-spacing: .01em;
+  padding-bottom: .4rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .7rem; }
+
+.step-row {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: 5px;
+  padding: .8rem 1rem .9rem;
+}
+/* Weight and style, not hue: dotted for untouched, solid and heavier as it
+   fills. Legible in greyscale and to anyone who cannot tell the two
+   accents apart. */
+.step-row { border-left-style: dotted; }
+.step-row--part { border-left-style: solid; border-left-width: 6px; }
+.step-row--done { border-left-style: double; border-left-width: 8px; }
+
+.step-row__head { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.step-row__num {
+  font-family: var(--mono); font-weight: 700; font-size: var(--fs-sm);
+  background: var(--text); color: var(--paper);
+  padding: .1em .45em; border-radius: 3px; white-space: nowrap;
+}
+.step-row__title { font-weight: 700; font-size: var(--fs-sm); flex: 1 1 20rem; }
+.step-row__state {
+  font-family: var(--mono); font-size: var(--fs-xs); font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  border: 1px solid currentColor; border-radius: 999px; padding: .1em .55em;
+  white-space: nowrap;
+}
+
+.step-row__links { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .65rem; }
+.step-link {
+  display: block; flex: 1 1 16rem;
+  padding: .55rem .75rem;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--panel-alt); color: var(--text);
+  text-decoration: none; font-size: var(--fs-sm);
+}
+.step-link:hover, .step-link:focus-visible {
+  border-color: var(--text);
+  outline: 2px solid var(--text); outline-offset: -2px;
+}
+.step-link__meta {
+  display: block; margin-top: .15rem;
+  font-family: var(--mono); font-size: var(--fs-xs);
+}
+
+.step-row__none { margin: .6rem 0 0; font-size: var(--fs-xs); font-style: italic; }
+
+.bar {
+  margin-top: .7rem; height: .5rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--border); border-radius: 999px;
+  overflow: hidden;
+}
+.bar__fill { display: block; height: 100%; background: var(--text); }
+
+.step-row__count {
+  margin: .35rem 0 0;
+  font-family: var(--mono); font-size: var(--fs-xs);
+}
+
+@media (max-width: 560px) {
+  .step-row__links { flex-direction: column; }
+  .step-link { flex: 1 1 auto; }
+}
