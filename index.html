@@ -26,7 +26,10 @@
       <select id="trackSelect" aria-label="Choose the sub-objective and its exercise"></select>
       <label for="slotSelect" style="font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;text-transform:uppercase;color:#b9c6c9">Ticket</label>
       <select id="slotSelect" aria-label="Choose ticket"></select>
-      <button class="btn btn--ghost" id="shuffleBtn" type="button" title="Regenerate all five tickets on this track">&#8635; Shuffle</button>
+      <button class="btn btn--ghost" id="shuffleBtn" type="button" title="Regenerate every ticket on this track">&#8635; Shuffle</button>
+      <a class="btn btn--ghost" href="path.html">The route through</a>
+      <button class="btn btn--ghost" id="nextNewBtn" type="button" title="Go to the first one you have not worked yet">Next unworked &rarr;</button>
+      <button class="btn btn--ghost" id="clearProgBtn" type="button" title="Forget which ones you have worked. Nothing else is stored.">Clear progress</button>
       <button class="btn btn--ghost" id="instructorBtn" type="button">Instructor mode</button>
       <button class="btn btn--ghost" id="themeBtn" type="button" aria-pressed="false">Dark</button>
     </div>
@@ -43,7 +46,7 @@
 
 <footer class="pg">
   <div class="wrap">
-    Every ticket is generated when the page loads &mdash; there is no answer bank to memorise, and Shuffle rebuilds all five.
+    Every ticket is generated when the page loads &mdash; there is no answer bank to memorise, and Shuffle rebuilds the whole track. Your place is remembered in this browser and nowhere else.
     Answers are computed from the instruments actually rendered, so they stay true after a regenerate.<br>
     Companies, callers, asset tags and part numbers are synthetic. For educational purposes only. Not affiliated with, endorsed by, or sponsored by CompTIA&reg;.
   </div>
