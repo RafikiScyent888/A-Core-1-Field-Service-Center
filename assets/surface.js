@@ -471,7 +471,7 @@ export function surface(name, THREE, size, seed, spec) {
        baked into it — which on a felted surface reads as gravel. */
     CACHE[key] = { map: tex, normalMap: null, printed: false, repeat: def.repeat };
     return CACHE[key];
-  }
+  } 
 
   const built = def.paint(px, seed, spec);
   const map = new THREE.CanvasTexture(built.color);
