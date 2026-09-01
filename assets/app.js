@@ -274,9 +274,58 @@ function renderQuestions(host, qs) {
     let input;
     if (q.kind === "choice") {
       const opts = q.shuffle ? ordShuffle(q.id, q.choices()) : q.choices();
-      input = el("select", "ans");
-      input.innerHTML = '<option value="">— select —</option>' +
-        opts.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+      /* A NATIVE SELECT CANNOT SHOW A SENTENCE.
+
+         Nearly every choice on this page is a full statement — the evidence
+         options run to a hundred and forty characters. A select sizes its
+         popup to the longest option and the browser then clips that at the
+         window edge, so the end of every line is simply gone; the closed
+         control truncates mid-word with no ellipsis. Both were happening at
+         once, and on a build whose students were chosen partly because
+         reading is hard for them, an unreadable control is not a cosmetic
+         fault.
+
+         Options that fit stay a select, because a radio list for five short
+         answers is three screens of scrolling for nothing. Anything longer
+         becomes a radio list, which wraps, which is fully readable at any
+         width, and which a screen reader announces one option at a time.
+
+         The group exposes `value` and `focus()` so every caller — the
+         checker, the hint reset, the keyboard handler — is unchanged. */
+      const LONG = 60;
+      if (opts.some((c) => String(c).length > LONG)) {
+        input = el("div", "ans ans--list");
+        input.setAttribute("role", "radiogroup");
+        input.setAttribute("aria-label", String(q.ask).replace(/<[^>]+>/g, ""));
+        opts.forEach((c, i) => {
+          const id = "opt-" + q.id + "-" + i;
+          const lab = el("label", "opt");
+          const rad = el("input"); rad.type = "radio"; rad.name = "r-" + q.id;
+          rad.value = String(c); rad.id = id;
+          const txt = el("span", "opt__t", esc(c));
+          lab.appendChild(rad); lab.appendChild(txt);
+          input.appendChild(lab);
+        });
+        Object.defineProperty(input, "value", {
+          get() {
+            const on = input.querySelector("input:checked");
+            return on ? on.value : "";
+          },
+          set(v) {
+            input.querySelectorAll("input").forEach((r) => {
+              r.checked = String(v) !== "" && r.value === String(v);
+            });
+          }
+        });
+        input.focus = function () {
+          const first = input.querySelector("input");
+          if (first) first.focus();
+        };
+      } else {
+        input = el("select", "ans");
+        input.innerHTML = '<option value="">— select —</option>' +
+          opts.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+      }
     } else {
       input = el("input"); input.type = "text";
       input.setAttribute("aria-label", String(q.ask).replace(/<[^>]+>/g, ""));
@@ -1206,6 +1255,12 @@ function partBench(t, model) {
      less than the comparison could see — it reported both as "identical".
      Reading the built model directly answers it exactly. Nothing on the
      page reads this; it exists so the claim can be checked. */
+  /* The grading state, exposed read-only on the same seam the model uses.
+     The step gates are computed from it, and until this was here the only
+     way to ask "did that unlock step four" was to look at a screenshot. A
+     lock that fires wrongly is invisible to every other check in the suite. */
+  window.__FSCgraded = () => Object.assign({}, graded);
+  window.__FSCrequired = (k) => requiredFor(k);
   window.__FSC = { track: G.track, fault: G.fault && G.fault.key,
     target: G.partTarget, model: model };
 
@@ -1593,6 +1648,7 @@ function prnStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Bench time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   const tests = printerBenchTests(G);
@@ -1611,7 +1667,21 @@ function prnStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -2157,6 +2227,7 @@ function lapStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Bench time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   const tests = laptopTests(G, (a) => ordShuffle("laptest", a));
@@ -2174,7 +2245,21 @@ function lapStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -2287,6 +2372,7 @@ function dispStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Bench time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   const tests = displayTests(G, (a) => ordShuffle("disptest", a));
@@ -2304,7 +2390,21 @@ function dispStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -2442,6 +2542,7 @@ function pnetStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   const tests = printnetTests(G, (x) => ordShuffle("pnettest", x));
@@ -2457,7 +2558,21 @@ function pnetStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -2774,6 +2889,7 @@ function raidStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   const tests = raidTests(G, (x) => ordShuffle("raidtest", x));
@@ -2789,7 +2905,21 @@ function raidStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -3107,6 +3237,7 @@ function pwrStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   const tests = powerTests(G, (a) => ordShuffle("pwrtest", a));
@@ -3122,7 +3253,21 @@ function pwrStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -3316,6 +3461,7 @@ function cabStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   const tools = toolsFor(G, (a) => ordShuffle("cabtool", a));
@@ -3331,7 +3477,11 @@ function cabStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tools.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* Finding it is the pass; how tidily is the feedback. See the
+           note on the other benches: grading the gate on a clean run meant
+           one wrong tool locked the rest of the ticket for good. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -3586,6 +3736,7 @@ function stepTest() {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   tests.forEach((tt) => {
     const card = el("div", "test");
     const lab = el("span", "test__label", esc(tt.label));
@@ -3603,10 +3754,15 @@ function stepTest() {
          it is wasted bench time — so it counts the same way. */
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
-        graded["test-isolate"] = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
+        const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
+        /* Finding it is the pass; how tidily is the feedback. See the
+           note on the other benches: grading the gate on a clean run meant
+           one wrong tool locked the rest of the ticket for good. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
-        fb.className = "fb " + (graded["test-isolate"] ? "fb--ok" : "fb--no");
-        fb.innerHTML = (graded["test-isolate"] ? "Correct" : "Confirmed, eventually") +
+        fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
+        fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") +
           '<span class="fb__why">' + esc(graded["test-isolate"]
             ? "Straight to it, in " + tt.mins + " minutes. That is the difference between a short call and an afternoon."
             : "That is the right test, but you spent " + spent + " minutes getting there. On a " +
@@ -4165,6 +4321,7 @@ function netStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Bench time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   tests.forEach((tt) => {
@@ -4181,7 +4338,21 @@ function netStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -4406,6 +4577,7 @@ function mobStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Bench time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   tests.forEach((tt) => {
@@ -4422,7 +4594,21 @@ function mobStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
@@ -4581,6 +4767,7 @@ function cloudStepTest(t) {
   const box = el("div", "tests");
   const benchHint = hintBox(box);
   const ran = {};
+  let benchClean = true;
   const timeSpent = el("p", "count", "Time spent: 0 minutes");
   const fb = el("p", "fb"); fb.style.display = "none";
   tests.forEach((tt) => {
@@ -4597,7 +4784,21 @@ function cloudStepTest(t) {
       if (tt.isolating) benchHint.right(); else benchHint.wrong(CONTROL_HINTS.bench);
       if (tt.isolating) {
         const clean = tests.filter((x) => ran[x.key] && !x.isolating).length === 0;
-        graded["test-isolate"] = clean;
+        /* FINDING IT IS THE PASS. HOW TIDILY IS THE FEEDBACK.
+
+           This used to be `graded["test-isolate"] = clean`, and `clean` is
+           false the moment a student opens any other tool first. The button
+           then disables, so the flag could never become true again — and
+           step four gates on `=== true`. A student who explored one wrong
+           tool before finding the right one had the rest of the ticket
+           locked against them permanently, with a lock message telling them
+           to finish a step they had just finished.
+
+           Trying the wrong instrument first is what diagnosis looks like.
+           It costs bench time, it is said plainly in the feedback below, and
+           it does not take the ticket away. */
+        graded["test-isolate"] = true;
+        benchClean = clean;
         fb.style.display = "";
         fb.className = "fb " + (clean ? "fb--ok" : "fb--no");
         fb.innerHTML = (clean ? "Correct" : "Confirmed, eventually") + '<span class="fb__why">' +
