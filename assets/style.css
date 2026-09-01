@@ -94,6 +94,25 @@
   .q__row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
   .q input[type=text],.q select.ans{font-family:var(--mono);font-size:var(--fs-xs);padding:.5em .6em;
     border-radius:3px;border:1px solid var(--border);background:var(--panel);color:var(--text);min-width:11rem}
+
+  /* A choice list, used wherever the options are full sentences rather than
+     short answers. A native select clips a long option at the window edge and
+     truncates the closed control mid-word; this wraps and stays readable at
+     any width. The row is column-flow here because each option is a
+     paragraph, not a chip. */
+  .q__row:has(.ans--list){flex-direction:column;align-items:stretch}
+  .ans--list{display:flex;flex-direction:column;gap:.25rem;width:100%}
+  .ans--list .opt{display:flex;gap:.55rem;align-items:flex-start;padding:.45em .6em;
+    border:1px solid var(--border);border-radius:3px;background:var(--panel);
+    font-family:var(--mono);font-size:var(--fs-xs);line-height:1.45;cursor:pointer}
+  .ans--list .opt:hover{border-color:var(--text)}
+  .ans--list .opt:focus-within{outline:2px solid var(--text);outline-offset:1px}
+  .ans--list input[type=radio]{margin:.2em 0 0;flex:0 0 auto}
+  .ans--list .opt__t{flex:1 1 auto}
+  .ans--list .opt:has(input:checked){border-color:var(--text);font-weight:600}
+  /* The closed select still truncates where the options are short enough to
+     keep one; an ellipsis says so rather than stopping mid-word. */
+  .q select.ans{max-width:100%;text-overflow:ellipsis}
   .q .btn{background:var(--text);color:var(--panel);border-color:var(--text)}
   .fb{font-family:var(--mono);font-size:var(--fs-xs);margin:.5rem 0 0;font-weight:700}
   .fb--ok::before{content:"\2713\00a0"}
