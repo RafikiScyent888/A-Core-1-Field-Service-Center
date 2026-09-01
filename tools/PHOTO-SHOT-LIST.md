@@ -1,5 +1,29 @@
 # Material tiles — what to shoot
 
+## Status
+
+**Done: dust.** A dusty-heatsink tile is in and wired to the damage mesh, so
+`lapthermal`, `lapfan` and `psufanseized` now draw a felted mat instead of a
+flat brown lump. It is in `assets/tiles.js` with its provenance recorded.
+
+**Still open: moulded, rubber, steel.** Those three painters in
+`assets/surface.js` are still written and applied to nothing.
+
+**Rejected: brushed aluminium.** A tile was supplied and could not be used —
+the photograph has a lighting gradient across it, light at one corner and
+dark at the other. Once tiled, that gradient becomes a visible checkerboard
+of light and dark squares. This is exactly the hotspot problem in the "how to
+shoot them" notes below, and it is the one mistake that cannot be corrected
+afterwards: the shading is baked into the pixels. The generated `brushed`
+surface is still in use and looks better.
+
+**Not needed: bare circuit board.** A good tile was supplied, but `pcb` is
+generated and stays that way — the generated one derives from the ticket, and
+a photographed board cannot. Traces also cannot be made to repeat without
+either mirroring (a visible kaleidoscope) or blending (visibly broken traces).
+
+---
+
 Three tiles and four reference photographs. Not photographs of components: photographs of **surfaces**.
 Each one becomes a small repeating tile that every part made of that material
 shares, so one good shot of bare circuit board does the work for every board on
