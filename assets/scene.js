@@ -885,7 +885,7 @@ export function mountScene(host, spec, opts) {
       flashSettled = false;
       applyStyle();
     },
-    flashing: function () { return flashKey; }, 
+    flashing: function () { return flashKey; },
     orbit: function (dy, dp) { yaw += dy; pitch += dp; place(); },
     zoom: function (d) { dist += d; place(); },
     reset: function () { yaw = home.yaw; pitch = home.pitch; dist = home.dist; place(); },
