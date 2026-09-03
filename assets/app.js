@@ -5317,7 +5317,7 @@ function tryPin() {
     instructor = true; insBtn.textContent = "Instructor mode: on";
     closePin(); applyInstructor();
   } else { pinErr.style.display = ""; pinErr.textContent = "Wrong PIN."; }
-}
+} 
 
 (function () {
   const root = document.documentElement;
