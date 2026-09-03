@@ -1965,7 +1965,7 @@ dependencies. Because it uses ES modules it must be **served over HTTP** —
 opening `index.html` from the filesystem will be blocked by CORS. GitHub Pages
 serves it correctly; locally, any static server will do.
 
-## Hosting
+## Hosting 
 
 GitHub Pages, deployed from `main` / root — Settings → Pages → Source: Deploy
 from a branch → `main` → `/ (root)`.
