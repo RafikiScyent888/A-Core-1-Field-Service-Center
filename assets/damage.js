@@ -870,7 +870,7 @@ export function damage(part, faultKey) {
     harmSkin: mat.skin || null,
     damaged: true
   });
-} 
+}
 
 /* Which faults on a track deliberately have no physical sign. Reported by
    the verifier so "no tell" stays a stated decision. */
